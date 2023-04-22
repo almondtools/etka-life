@@ -66,7 +66,7 @@ impl Universe {
     pub fn cells(&self) -> *const Cell {
         self.cells.as_ptr()
     }
-
+    
     pub fn tick(&mut self) {
         use Cell::*;
         let mut next = self.cells.clone();
@@ -74,7 +74,10 @@ impl Universe {
         for row in 0..self.height {
             for col in 0..self.width {
                 let (cell, neighbours) = self.neighbourhood(row, col);
-                let live_neighbors = neighbours.into_iter().filter(|cell| cell.is_alive()).count();
+                let live_neighbors = neighbours
+                    .into_iter()
+                    .filter(|cell| cell.is_alive())
+                    .count();
 
                 let next_cell = match (cell, live_neighbors) {
                     // Rule 1: Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
@@ -89,7 +92,7 @@ impl Universe {
                     (otherwise, _) => otherwise,
                 };
 
-                let idx = self.idx((row,col));
+                let idx = self.idx((row, col));
                 next[idx] = next_cell;
             }
         }
@@ -98,12 +101,12 @@ impl Universe {
     }
 
     pub fn toggle_cell(&mut self, row: u32, col: u32) {
-        self[(row,col)].toggle();
+        self[(row, col)].toggle();
     }
 }
 
 impl Universe {
-    fn idx(&self, (row,column): (u32, u32)) -> usize {
+    fn idx(&self, (row, column): (u32, u32)) -> usize {
         (row * self.width + column) as usize
     }
 

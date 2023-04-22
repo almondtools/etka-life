@@ -59,41 +59,29 @@ const drawCells = () => {
   ctx.beginPath();
 
 
-  ctx.fillStyle = ALIVE_COLOR;
-  for (let row = 0; row < height; row++) {
-    for (let col = 0; col < width; col++) {
-      const idx = getIndex(row, col);
-      if (cells[idx] !== ALIVE) {
-        continue;
-      }
-
-      ctx.fillRect(
-        col * (CELL_SIZE + 1) + 1,
-        row * (CELL_SIZE + 1) + 1,
-        CELL_SIZE,
-        CELL_SIZE
-      );
-    }
-  }
-
-  ctx.fillStyle = DEAD_COLOR;
-  for (let row = 0; row < height; row++) {
-    for (let col = 0; col < width; col++) {
-      const idx = getIndex(row, col);
-      if (cells[idx] !== DEAD) {
-        continue;
-      }
-
-      ctx.fillRect(
-        col * (CELL_SIZE + 1) + 1,
-        row * (CELL_SIZE + 1) + 1,
-        CELL_SIZE,
-        CELL_SIZE
-      );
-    }
-  }
+  drawCellsOfType(cells, ALIVE, ALIVE_COLOR);
+  drawCellsOfType(cells, DEAD, DEAD_COLOR);
 
   ctx.stroke();
+};
+
+const drawCellsOfType = (cells, condition, style) => {
+  ctx.fillStyle = style;
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      const idx = getIndex(row, col);
+      if (cells[idx] !== condition) {
+        continue;
+      }
+
+      ctx.fillRect(
+        col * (CELL_SIZE + 1) + 1,
+        row * (CELL_SIZE + 1) + 1,
+        CELL_SIZE,
+        CELL_SIZE
+      );
+    }
+  }
 };
 
 const playPauseButton = document.getElementById("play-pause");
@@ -136,7 +124,6 @@ canvas.addEventListener("click", event => {
   universe.toggle_cell(row, col);
 
   drawCells();
-  drawGrid();
 });
 
 play();
