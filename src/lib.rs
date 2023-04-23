@@ -11,14 +11,6 @@ pub enum Cell {
 }
 
 impl Cell {
-    fn toggle(&mut self) {
-        use Cell::*;
-        *self = match *self {
-            Dead => Alive,
-            Alive => Dead,
-        };
-    }
-
     fn is_alive(&self) -> bool {
         *self as u8 == 1
     }
@@ -29,6 +21,32 @@ pub struct Universe {
     width: u32,
     height: u32,
     cells: Vec<Cell>,
+}
+
+impl Universe {
+    fn idx(&self, (row, column): (u32, u32)) -> usize {
+        (row * self.width + column) as usize
+    }
+
+    fn neighbourhood(&self, row: u32, col: u32) -> (Cell, [Cell; 8]) {
+        #![allow(warnings)]
+        let last_row = self.height - 1;
+        let last_col = self.width - 1;
+        let N = if row == 0 { last_row } else { row - 1 };
+        let S = if row == last_row { 0 } else { row + 1 };
+        let W = if col == 0 { last_col } else { col - 1 };
+        let E = if col == last_col { 0 } else { col + 1 };
+
+        let cell = self[(row, col)];
+        let neighbour_cells = #[rustfmt::skip] {
+      [
+      self[(N, W)], self[(N, col)], self[(N, E)],
+      self[(row, W)],                self[(row, E)],
+      self[(S, W)], self[(S, col)], self[(S, E)],
+      ]
+    };
+        (cell, neighbour_cells)
+    }
 }
 
 #[wasm_bindgen]
@@ -66,7 +84,7 @@ impl Universe {
     pub fn cells(&self) -> *const Cell {
         self.cells.as_ptr()
     }
-    
+
     pub fn tick(&mut self) {
         use Cell::*;
         let mut next = self.cells.clone();
@@ -98,36 +116,6 @@ impl Universe {
         }
 
         self.cells = next;
-    }
-
-    pub fn toggle_cell(&mut self, row: u32, col: u32) {
-        self[(row, col)].toggle();
-    }
-}
-
-impl Universe {
-    fn idx(&self, (row, column): (u32, u32)) -> usize {
-        (row * self.width + column) as usize
-    }
-
-    fn neighbourhood(&self, row: u32, col: u32) -> (Cell, [Cell; 8]) {
-        #![allow(warnings)]
-        let last_row = self.height - 1;
-        let last_col = self.width - 1;
-        let N = if row == 0 { last_row } else { row - 1 };
-        let S = if row == last_row { 0 } else { row + 1 };
-        let W = if col == 0 { last_col } else { col - 1 };
-        let E = if col == last_col { 0 } else { col + 1 };
-
-        let cell = self[(row, col)];
-        let neighbour_cells = #[rustfmt::skip] {
-            [
-                self[(N, W)], self[(N, col)], self[(N, E)],
-                self[(row, W)],                self[(row, E)],
-                self[(S, W)], self[(S, col)], self[(S, E)],
-            ]
-        };
-        (cell, neighbour_cells)
     }
 }
 
