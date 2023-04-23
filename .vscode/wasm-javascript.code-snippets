@@ -1,4 +1,54 @@
 {
+	"drawCells": {
+		"prefix": "drawCells",
+		"body": [
+			"const drawCells = () => {",
+			"  const cellsPtr = universe.cells();",
+			"  const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);",
+			"",
+			"  ctx.beginPath();",
+			"",
+			"  drawCellsOfType(cells, ALIVE, ALIVE_COLOR);",
+			"  drawCellsOfType(cells, DEAD, DEAD_COLOR);",
+			"",
+			"  ctx.stroke();",
+			"};"
+		]
+	},
+	"drawCellsOfType": {
+		"prefix": "drawCellsOfType",
+		"body": [
+			"const drawCellsOfType = (cells, condition, style) => {",
+			"  ctx.fillStyle = style;",
+			"  for (let row = 0; row < height; row++) {",
+			"    for (let col = 0; col < width; col++) {",
+			"      const idx = getIndex(row, col);",
+			"      if (cells[idx] !== condition) {",
+			"        continue;",
+			"      }",
+			"",
+			"      ctx.fillRect(",
+			"        col * (CELL_SIZE + 1) + 1,",
+			"        row * (CELL_SIZE + 1) + 1,",
+			"        CELL_SIZE,",
+			"        CELL_SIZE",
+			"      );",
+			"    }",
+			"  }",
+			"};"
+		]
+	},
+	"Universe": {
+		"prefix": "Universe",
+		"body": [
+			"#[wasm_bindgen]",
+			"pub struct Universe {",
+			"  width: u32,",
+			"  height: u32,",
+			"  cells: Vec<Cell>,",
+			"}"
+		]
+	},
 	"Cell": {
 		"prefix": "Cell",
 		"body": [
@@ -7,6 +57,54 @@
 			"pub enum Cell {",
 			"  Dead = 0,",
 			"  Alive = 1,",
+			"}"
+		]
+	},
+	"implUniverseAPI": {
+		"prefix": "impl UniverseAPI",
+		"body": [
+			"#[wasm_bindgen]",
+			"impl Universe {",
+			"  pub fn new() -> Universe {",
+			"    use Cell::*;",
+			"    let width = 128;",
+			"    let height = 128;",
+			"",
+			"    let cells = (0..width * height)",
+			"      .map(|i| {",
+			"        if i % 2 == 0 || i % 7 == 0 {",
+			"          Alive",
+			"        } else {",
+			"          Dead",
+			"        }",
+			"      })",
+			"      .collect();",
+			"",
+			"    Universe {",
+			"      width,",
+			"      height,",
+			"      cells,",
+			"    }",
+			"  }",
+			"",
+			"  pub fn width(&self) -> u32 {",
+			"    self.width",
+			"  }",
+			"",
+			"  pub fn height(&self) -> u32 {",
+			"    self.height",
+			"  }",
+			"",
+			"  pub fn cells(&self) -> *const Cell {",
+			"    self.cells.as_ptr()",
+			"  }",
+			"",
+			"  pub fn tick(&mut self) {",
+			"  }",
+			"",
+			"  pub fn toggle_cell(&mut self, row: u32, col: u32) {",
+			"    self[(row,col)].toggle();",
+			"  }",
 			"}"
 		]
 	},
@@ -25,17 +123,6 @@
 			"  fn is_alive(&self) -> bool {",
 			"    *self as u8 == 1",
 			"  }",
-			"}"
-		]
-	},
-	"Universe": {
-		"prefix": "Universe",
-		"body": [
-			"#[wasm_bindgen]",
-			"pub struct Universe {",
-			"  width: u32,",
-			"  height: u32,",
-			"  cells: Vec<Cell>,",
 			"}"
 		]
 	},
@@ -93,54 +180,6 @@
 			"}"
 		]
 	},
-	"implUniverseBindgen": {
-		"prefix": "impl Universe2",
-		"body": [
-			"#[wasm_bindgen]",
-			"impl Universe {",
-			"  pub fn new() -> Universe {",
-			"    use Cell::*;",
-			"    let width = 128;",
-			"    let height = 128;",
-			"",
-			"    let cells = (0..width * height)",
-			"      .map(|i| {",
-			"        if i % 2 == 0 || i % 7 == 0 {",
-			"          Alive",
-			"        } else {",
-			"          Dead",
-			"        }",
-			"      })",
-			"      .collect();",
-			"",
-			"    Universe {",
-			"      width,",
-			"      height,",
-			"      cells,",
-			"    }",
-			"  }",
-			"",
-			"  pub fn width(&self) -> u32 {",
-			"    self.width",
-			"  }",
-			"",
-			"  pub fn height(&self) -> u32 {",
-			"    self.height",
-			"  }",
-			"",
-			"  pub fn cells(&self) -> *const Cell {",
-			"    self.cells.as_ptr()",
-			"  }",
-			"",
-			"  pub fn tick(&mut self) {",
-			"  }",
-			"",
-			"  pub fn toggle_cell(&mut self, row: u32, col: u32) {",
-			"    self[(row,col)].toggle();",
-			"  }",
-			"}"
-		]
-	},
 	"tick": {
 		"prefix": "tick",
 		"body": [
@@ -174,43 +213,5 @@
 			"    self.cells = next;",
 			"  }"
 		]
-	},
-	"drawCells": {
-		"prefix": "drawCells",
-		"body": [
-			"const drawCells = () => {",
-			"  const cellsPtr = universe.cells();",
-			"  const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);",
-			"",
-			"  ctx.beginPath();",
-			"",
-			"  drawCellsOfType(cells, ALIVE, ALIVE_COLOR);",
-			"  drawCellsOfType(cells, DEAD, DEAD_COLOR);",
-			"",
-			"  ctx.stroke();",
-			"};"
-		},
-		"drawCellsOfType": {
-			"prefix": "drawCellsOfType",
-			"body": [
-				"const drawCellsOfType = (cells, condition, style) => {",
-				"  ctx.fillStyle = style;",
-				"  for (let row = 0; row < height; row++) {",
-				"    for (let col = 0; col < width; col++) {",
-				"      const idx = getIndex(row, col);",
-				"      if (cells[idx] !== condition) {",
-				"        continue;",
-				"      }",
-				"",
-				"      ctx.fillRect(",
-				"        col * (CELL_SIZE + 1) + 1,",
-				"        row * (CELL_SIZE + 1) + 1,",
-				"        CELL_SIZE,",
-				"        CELL_SIZE",
-				"      );",
-				"    }",
-				"  }",
-				"};"
-			]
-		}
 	}
+}
