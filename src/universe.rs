@@ -1,7 +1,4 @@
-#![feature(stmt_expr_attributes)]
 use std::ops::{Index, IndexMut};
-
-use wasm_bindgen::prelude::wasm_bindgen;
 
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -16,40 +13,13 @@ impl Cell {
     }
 }
 
-#[wasm_bindgen]
+// TODO: Impl Iter with row / col and Cell ??
 pub struct Universe {
     width: u32,
     height: u32,
     cells: Vec<Cell>,
 }
 
-impl Universe {
-    fn idx(&self, (row, column): (u32, u32)) -> usize {
-        (row * self.width + column) as usize
-    }
-
-    fn neighbourhood(&self, row: u32, col: u32) -> (Cell, [Cell; 8]) {
-        #![allow(warnings)]
-        let last_row = self.height - 1;
-        let last_col = self.width - 1;
-        let N = if row == 0 { last_row } else { row - 1 };
-        let S = if row == last_row { 0 } else { row + 1 };
-        let W = if col == 0 { last_col } else { col - 1 };
-        let E = if col == last_col { 0 } else { col + 1 };
-
-        let cell = self[(row, col)];
-        let neighbour_cells = #[rustfmt::skip] {
-      [
-      self[(N, W)], self[(N, col)], self[(N, E)],
-      self[(row, W)],                self[(row, E)],
-      self[(S, W)], self[(S, col)], self[(S, E)],
-      ]
-    };
-        (cell, neighbour_cells)
-    }
-}
-
-#[wasm_bindgen]
 impl Universe {
     pub fn new() -> Universe {
         use Cell::*;
@@ -79,10 +49,6 @@ impl Universe {
 
     pub fn height(&self) -> u32 {
         self.height
-    }
-
-    pub fn cells(&self) -> *const Cell {
-        self.cells.as_ptr()
     }
 
     pub fn tick(&mut self) {
@@ -117,19 +83,46 @@ impl Universe {
 
         self.cells = next;
     }
+
+    pub fn idx(&self, (row, column): (u32, u32)) -> usize {
+        (row * self.width + column) as usize
+    }
+}
+
+impl Universe {
+    fn neighbourhood(&self, row: u32, col: u32) -> (Cell, [Cell; 8]) {
+        #![allow(warnings)]
+        let last_row = self.height - 1;
+        let last_col = self.width - 1;
+        let N = if row == 0 { last_row } else { row - 1 };
+        let S = if row == last_row { 0 } else { row + 1 };
+        let W = if col == 0 { last_col } else { col - 1 };
+        let E = if col == last_col { 0 } else { col + 1 };
+
+        let cell = self[(row, col)];
+        #[rustfmt::skip]
+        let neighbour_cells = {
+            [
+                self[(N, W)], self[(N, col)], self[(N, E)],
+                self[(row, W)],                self[(row, E)],
+                self[(S, W)], self[(S, col)], self[(S, E)],
+            ]
+        };
+        (cell, neighbour_cells)
+    }
 }
 
 impl Index<(u32, u32)> for Universe {
     type Output = Cell;
 
-    fn index(&self, index: (u32, u32)) -> &Cell {
+    fn index(&self, index: (u32, u32)) -> &Self::Output {
         let index = self.idx(index);
         &self.cells[index]
     }
 }
 
 impl IndexMut<(u32, u32)> for Universe {
-    fn index_mut(&mut self, index: (u32, u32)) -> &mut Cell {
+    fn index_mut(&mut self, index: (u32, u32)) -> &mut Self::Output {
         let index = self.idx(index);
         &mut self.cells[index]
     }
