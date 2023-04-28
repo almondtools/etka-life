@@ -1,4 +1,3 @@
-#![feature(stmt_expr_attributes)]
 use std::ops::{Index, IndexMut};
 
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -38,13 +37,12 @@ impl Universe {
         let E = if col == last_col { 0 } else { col + 1 };
 
         let cell = self[(row, col)];
-        let neighbour_cells = #[rustfmt::skip] {
-      [
-      self[(N, W)], self[(N, col)], self[(N, E)],
-      self[(row, W)],                self[(row, E)],
-      self[(S, W)], self[(S, col)], self[(S, E)],
-      ]
-    };
+        #[rustfmt::skip]
+        let neighbour_cells = [
+          self[(N, W)], self[(N, col)], self[(N, E)],
+          self[(row, W)],               self[(row, E)],
+          self[(S, W)], self[(S, col)], self[(S, E)],
+        ];
         (cell, neighbour_cells)
     }
 }
@@ -88,7 +86,6 @@ impl Universe {
     pub fn tick(&mut self) {
         use Cell::*;
         let mut next = self.cells.clone();
-
         for row in 0..self.height {
             for col in 0..self.width {
                 let (cell, neighbours) = self.neighbourhood(row, col);
