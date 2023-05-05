@@ -13,7 +13,6 @@ impl Cell {
     }
 }
 
-// TODO: Impl Iter with row / col and Cell ??
 pub struct Universe {
     width: u32,
     height: u32,

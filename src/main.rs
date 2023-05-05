@@ -1,11 +1,10 @@
 use crate::universe::Universe;
 use dioxus::prelude::*;
-use game_of_life::{GameOfLife, CELL_SIZE};
-use std::cell::RefCell;
+use canvas::{CanvasController, CELL_SIZE};
 use std::time::Duration;
-use wasm_bindgen::JsCast;
 
-mod game_of_life;
+
+mod canvas;
 mod universe;
 
 const CONTAINER_STYLE: &str = r"
@@ -20,24 +19,16 @@ fn main() {
 
 #[allow(non_snake_case)]
 fn App(cx: Scope) -> Element {
-    let universe = Universe::new();
-    let canvas_height = (CELL_SIZE + 1) * universe.height() + 1;
-    let canvas_width = (CELL_SIZE + 1) * universe.width() + 1;
+    let universe = use_ref(cx,Universe::new);
     let is_playing = use_state(cx, || true);
-
-    let game_of_life = use_state(cx, || RefCell::new(None::<GameOfLife>));
-
-    let game_of_life_init: UseState<RefCell<Option<GameOfLife>>> = game_of_life.clone();
-    use_effect(cx, (), move |()| async move {
-        let context = get_context_2d();
-        *game_of_life_init.borrow_mut() = Some(GameOfLife::new(context, universe));
-    });
-
-    let game_of_life_play = game_of_life.clone();
-    use_effect(cx, (is_playing,), move |(is_playing,)| async move {
+    
+    let universe_for_loop = universe.clone();
+    use_future(cx, (is_playing,), move |(is_playing,)| async move {
         while *is_playing.current() {
-            if let Some(game_of_life) = game_of_life_play.borrow_mut().as_mut() {
-                game_of_life.tick();
+            { // caution this scope is necessary to ensure that all borrowed resources are dropped before entering the asynchronous workflow
+                let universe = universe_for_loop.clone();
+                let mut universe = universe.write_silent();
+                CanvasController::with("game-of-life-canvas", &mut *universe).tick();
             }
             async_std::task::sleep(Duration::from_millis(1)).await;
         }
@@ -46,7 +37,7 @@ fn App(cx: Scope) -> Element {
     cx.render(rsx! {
         div { style: "{CONTAINER_STYLE}",
             PlayButton { is_playing: is_playing }
-            canvas { id: "game-of-life-canvas", height: canvas_height as i64, width: canvas_width as i64 }
+            Canvas { id: "game-of-life-canvas", universe:universe}
         }
     })
 }
@@ -63,18 +54,14 @@ fn PlayButton<'a>(cx: Scope<'a>, is_playing: &'a UseState<bool>) -> Element {
     })
 }
 
-fn get_context_2d() -> web_sys::CanvasRenderingContext2d {
-    let window = web_sys::window().expect("global window does not exists");
-    let document = window.document().expect("expecting a document on window");
-    let canvas = document
-        .get_element_by_id("game-of-life-canvas")
-        .expect("expecting a canvas in the document")
-        .dyn_into::<web_sys::HtmlCanvasElement>()
-        .unwrap();
-    canvas
-        .get_context("2d")
-        .unwrap()
-        .unwrap()
-        .dyn_into::<web_sys::CanvasRenderingContext2d>()
-        .unwrap()
+#[inline_props]
+#[allow(non_snake_case)]
+fn Canvas<'a>(cx: Scope<'a>, id:&'a str, universe: &'a UseRef<Universe>) -> Element {
+    let (height, width) = (universe.read().height(),universe.read().width());
+    let canvas_height = ((CELL_SIZE + 1) * height + 1) as i64;
+    let canvas_width = ((CELL_SIZE + 1) * width + 1) as i64;
+    let id = id.to_owned();
+    cx.render(rsx! {
+        canvas { id: id, height:canvas_height, width:canvas_width}
+    })
 }

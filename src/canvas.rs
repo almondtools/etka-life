@@ -1,3 +1,5 @@
+use wasm_bindgen::JsCast;
+
 use crate::universe::{Cell, Universe};
 
 pub const CELL_SIZE: u32 = 5;
@@ -6,13 +8,27 @@ const GRID_COLOR: &str = "#CCCCCC";
 const DEAD_COLOR: &str = "#FFFFFF";
 const ALIVE_COLOR: &str = "#000000";
 
-pub struct GameOfLife {
+pub struct CanvasController<'a> {
     context: web_sys::CanvasRenderingContext2d,
-    universe: Universe,
+    universe: &'a mut Universe,
 }
 
-impl GameOfLife {
-    pub fn new(context: web_sys::CanvasRenderingContext2d, universe: Universe) -> Self {
+impl <'a> CanvasController<'a> {
+    pub fn with(id: &str, universe: &'a mut Universe) -> CanvasController<'a> {
+        let window = web_sys::window().expect("global window does not exists");
+        let document = window.document().expect("expecting a document on window");
+        let canvas = document
+            .get_element_by_id(id)
+            .expect("expecting a canvas in the document")
+            .dyn_into::<web_sys::HtmlCanvasElement>()
+            .unwrap();
+    
+        let context = canvas
+            .get_context("2d")
+            .unwrap()
+            .unwrap()
+            .dyn_into::<web_sys::CanvasRenderingContext2d>()
+            .unwrap();
         Self { context, universe }
     }
 
