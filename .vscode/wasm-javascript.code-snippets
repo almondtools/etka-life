@@ -161,43 +161,67 @@
 			"    self.cells = next;",
 		]
 	},
-	"drawCells": {
-		"prefix": "drawCells",
+	"initUniverse": {
+		"prefix": "initUniverse",
 		"body": [
-			"const drawCells = () => {",
-			"  const cellsPtr = universe.cells();",
-			"  const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);",
-			"",
-			"  ctx.beginPath();",
-			"",
-			"  drawCellsOfType(cells, ALIVE, ALIVE_COLOR);",
-			"  drawCellsOfType(cells, DEAD, DEAD_COLOR);",
-			"",
-			"  ctx.stroke();",
-			"};"
+			"const universe = Universe.new();",
+			"const width = universe.width();",
+			"const height = universe.height();"
 		]
 	},
-	"drawCellsOfType": {
-		"prefix": "drawCellsOfType",
+	"drawGridBody": {
+		"prefix": "drawGridBody",
 		"body": [
-			"const drawCellsOfType = (cells, condition, style) => {",
-			"  ctx.fillStyle = style;",
-			"  for (let row = 0; row < height; row++) {",
-			"    for (let col = 0; col < width; col++) {",
-			"      const idx = getIndex(row, col);",
-			"      if (cells[idx] !== condition) {",
-			"        continue;",
-			"      }",
+			"ctx.beginPath();",
+			"ctx.strokeStyle = GRID_COLOR;",
 			"",
-			"      ctx.fillRect(",
-			"        col * (CELL_SIZE + 1) + 1,",
-			"        row * (CELL_SIZE + 1) + 1,",
-			"        CELL_SIZE,",
-			"        CELL_SIZE",
-			"      );",
+			"",
+			"for (let i = 0; i <= width; i++) {",
+			"  ctx.moveTo(i * (CELL_SIZE + 1) + 1, 0);",
+			"  ctx.lineTo(i * (CELL_SIZE + 1) + 1, (CELL_SIZE + 1) * height + 1);",
+			"}",
+			"",
+			"for (let j = 0; j <= height; j++) {",
+			"  ctx.moveTo(0, j * (CELL_SIZE + 1) + 1);",
+			"  ctx.lineTo((CELL_SIZE + 1) * width + 1, j * (CELL_SIZE + 1) + 1);",
+			"}",
+			"",
+			"ctx.stroke();"
+		]
+	},
+	"drawCellsBody": {
+		"prefix": "drawCellsBody",
+		"body": [
+			"const cellsPtr = universe.cells();",
+			"const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);",
+			"",
+			"ctx.beginPath();",
+			"",
+			"drawCellsOfType(cells, ALIVE, ALIVE_COLOR);",
+			"drawCellsOfType(cells, DEAD, DEAD_COLOR);",
+			"",
+			"ctx.stroke();"
+		]
+	},
+	"drawCellsOfTypeBody": {
+		"prefix": "drawCellsOfTypeBody",
+		"body": [
+			"ctx.fillStyle = style;",
+			"for (let row = 0; row < height; row++) {",
+			"  for (let col = 0; col < width; col++) {",
+			"    const idx = getIndex(row, col);",
+			"    if (cells[idx] !== condition) {",
+			"      continue;",
 			"    }",
+			"",
+			"     ctx.fillRect(",
+			"       col * (CELL_SIZE + 1) + 1,",
+			"       row * (CELL_SIZE + 1) + 1,",
+			"       CELL_SIZE,",
+			"       CELL_SIZE",
+			"    );",
 			"  }",
-			"};"
+			"}"
 		]
 	}
 	
