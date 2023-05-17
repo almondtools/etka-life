@@ -1,41 +1,23 @@
 {
-	"drawCells": {
-		"prefix": "drawCells",
+	"Cell": {
+		"prefix": "Cell",
 		"body": [
-			"const drawCells = () => {",
-			"  const cellsPtr = universe.cells();",
-			"  const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);",
-			"",
-			"  ctx.beginPath();",
-			"",
-			"  drawCellsOfType(cells, ALIVE, ALIVE_COLOR);",
-			"  drawCellsOfType(cells, DEAD, DEAD_COLOR);",
-			"",
-			"  ctx.stroke();",
-			"};"
+			"#[repr(u8)]",
+			"#[derive(Clone, Copy, Debug, PartialEq, Eq)]",
+			"pub enum Cell {",
+			"  Dead = 0,",
+			"  Alive = 1,",
+			"}"
 		]
 	},
-	"drawCellsOfType": {
-		"prefix": "drawCellsOfType",
+	"implCell": {
+		"prefix": "impl Cell",
 		"body": [
-			"const drawCellsOfType = (cells, condition, style) => {",
-			"  ctx.fillStyle = style;",
-			"  for (let row = 0; row < height; row++) {",
-			"    for (let col = 0; col < width; col++) {",
-			"      const idx = getIndex(row, col);",
-			"      if (cells[idx] !== condition) {",
-			"        continue;",
-			"      }",
-			"",
-			"      ctx.fillRect(",
-			"        col * (CELL_SIZE + 1) + 1,",
-			"        row * (CELL_SIZE + 1) + 1,",
-			"        CELL_SIZE,",
-			"        CELL_SIZE",
-			"      );",
-			"    }",
+			"impl Cell {",
+			"  fn is_alive(&self) -> bool {",
+			"    *self as u8 == 1",
 			"  }",
-			"};"
+			"}"
 		]
 	},
 	"Universe": {
@@ -49,14 +31,32 @@
 			"}"
 		]
 	},
-	"Cell": {
-		"prefix": "Cell",
+	"implUniverse": {
+		"prefix": "impl Universe",
 		"body": [
-			"#[repr(u8)]",
-			"#[derive(Clone, Copy, Debug, PartialEq, Eq)]",
-			"pub enum Cell {",
-			"  Dead = 0,",
-			"  Alive = 1,",
+			"impl Universe {",
+			"  fn idx(&self, (row,column): (u32, u32)) -> usize {",
+			"    (row * self.width + column) as usize",
+			"  }",
+			"",
+			"  fn neighbourhood(&self, row: u32, col: u32) -> (Cell, [Cell; 8]) {",
+			"    #![allow(warnings)]",
+			"    let last_row = self.height - 1;",
+			"    let last_col = self.width - 1;",
+			"    let N = if row == 0 { last_row } else { row - 1 };",
+			"    let S = if row == last_row { 0 } else { row + 1 };",
+			"    let W = if col == 0 { last_col } else { col - 1 };",
+			"    let E = if col == last_col { 0 } else { col + 1 };",
+			"",
+			"    let cell = self[(row, col)];",
+			"    #[rustfmt::skip]",
+			"    let neighbour_cells = [",
+			"      self[(N, W)], self[(N, col)], self[(N, E)],",
+			"      self[(row, W)],               self[(row, E)],",
+			"      self[(S, W)], self[(S, col)], self[(S, E)],",
+			"    ];",
+			"    (cell, neighbour_cells)",
+			"  }",
 			"}"
 		]
 	},
@@ -100,58 +100,7 @@
 			"  }",
 			"",
 			"  pub fn tick(&mut self) {",
-			"  }",
-			"",
-			"  pub fn toggle_cell(&mut self, row: u32, col: u32) {",
-			"    self[(row,col)].toggle();",
-			"  }",
-			"}"
-		]
-	},
-	"implCell": {
-		"prefix": "impl Cell",
-		"body": [
-			"impl Cell {",
-			"  fn toggle(&mut self) {",
-			"    use Cell::*;",
-			"    *self = match *self {",
-			"      Dead => Alive,",
-			"      Alive => Dead,",
-			"    };",
-			"  }",
-			"",
-			"  fn is_alive(&self) -> bool {",
-			"    *self as u8 == 1",
-			"  }",
-			"}"
-		]
-	},
-	"implUniverse": {
-		"prefix": "impl Universe",
-		"body": [
-			"impl Universe {",
-			"  fn idx(&self, (row,column): (u32, u32)) -> usize {",
-			"    (row * self.width + column) as usize",
-			"  }",
-			"",
-			"  fn neighbourhood(&self, row: u32, col: u32) -> (Cell, [Cell; 8]) {",
-			"    #![allow(warnings)]",
-			"    let last_row = self.height - 1;",
-			"    let last_col = self.width - 1;",
-			"    let N = if row == 0 { last_row } else { row - 1 };",
-			"    let S = if row == last_row { 0 } else { row + 1 };",
-			"    let W = if col == 0 { last_col } else { col - 1 };",
-			"    let E = if col == last_col { 0 } else { col + 1 };",
-			"",
-			"    let cell = self[(row, col)];",
-			"    let neighbour_cells = #[rustfmt::skip] {",
-			"      [",
-			"      self[(N, W)], self[(N, col)], self[(N, E)],",
-			"      self[(row, W)],                self[(row, E)],",
-			"      self[(S, W)], self[(S, col)], self[(S, E)],",
-			"      ]",
-			"    };",
-			"    (cell, neighbour_cells)",
+			"    //TODO tickBody",
 			"  }",
 			"}"
 		]
@@ -180,10 +129,9 @@
 			"}"
 		]
 	},
-	"tick": {
+	"tickBody": {
 		"prefix": "tick",
 		"body": [
-			"  pub fn tick(&mut self) {",
 			"    use Cell::*;",
 			"    let mut next = self.cells.clone();",
 			"",
@@ -211,7 +159,46 @@
 			"    }",
 			"",
 			"    self.cells = next;",
-			"  }"
+		]
+	},
+	"drawCells": {
+		"prefix": "drawCells",
+		"body": [
+			"const drawCells = () => {",
+			"  const cellsPtr = universe.cells();",
+			"  const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);",
+			"",
+			"  ctx.beginPath();",
+			"",
+			"  drawCellsOfType(cells, ALIVE, ALIVE_COLOR);",
+			"  drawCellsOfType(cells, DEAD, DEAD_COLOR);",
+			"",
+			"  ctx.stroke();",
+			"};"
+		]
+	},
+	"drawCellsOfType": {
+		"prefix": "drawCellsOfType",
+		"body": [
+			"const drawCellsOfType = (cells, condition, style) => {",
+			"  ctx.fillStyle = style;",
+			"  for (let row = 0; row < height; row++) {",
+			"    for (let col = 0; col < width; col++) {",
+			"      const idx = getIndex(row, col);",
+			"      if (cells[idx] !== condition) {",
+			"        continue;",
+			"      }",
+			"",
+			"      ctx.fillRect(",
+			"        col * (CELL_SIZE + 1) + 1,",
+			"        row * (CELL_SIZE + 1) + 1,",
+			"        CELL_SIZE,",
+			"        CELL_SIZE",
+			"      );",
+			"    }",
+			"  }",
+			"};"
 		]
 	}
+	
 }
