@@ -3,13 +3,13 @@ use std::ops::{Index, IndexMut};
 // #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Cell {
-    Dead = 0,
-    Alive = 1,
+    Dead,
+    Alive,
 }
 
 impl Cell {
     fn is_alive(&self) -> bool {
-        *self as u8 == 1
+        *self == Cell::Alive
     }
 }
 
@@ -21,8 +21,7 @@ pub struct Universe {
 }
 
 impl Universe {
-    // pub
-    pub fn idx(&self, (row, column): (u32, u32)) -> usize {
+    fn idx(&self, (row, column): (u32, u32)) -> usize {
         (row * self.width + column) as usize
     }
 
