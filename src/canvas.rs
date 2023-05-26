@@ -13,7 +13,7 @@ pub struct CanvasController<'a> {
     universe: &'a mut Universe,
 }
 
-impl <'a> CanvasController<'a> {
+impl<'a> CanvasController<'a> {
     pub fn with(id: &str, universe: &'a mut Universe) -> CanvasController<'a> {
         let window = web_sys::window().expect("global window does not exists");
         let document = window.document().expect("expecting a document on window");
@@ -22,7 +22,7 @@ impl <'a> CanvasController<'a> {
             .expect("expecting a canvas in the document")
             .dyn_into::<web_sys::HtmlCanvasElement>()
             .unwrap();
-    
+
         let context = canvas
             .get_context("2d")
             .unwrap()
