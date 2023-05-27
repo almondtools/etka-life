@@ -2,16 +2,16 @@ use std::ops::{Index, IndexMut};
 
 use wasm_bindgen::prelude::wasm_bindgen;
 
-//TODO Cell
+// Cell
 
-//TODO implCell
+// implCell
 
-//TODO Universe
+// Universe
 
-//TODO implUniverse
+// implUniverse
 
-//TODO impl Index
+// impl Index
 
-//TODO impl IndexMut
+// impl IndexMut
 
-//TODO implUniverseApi
+// implUniverseApi

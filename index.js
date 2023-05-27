@@ -9,7 +9,7 @@ const ALIVE_COLOR = "#000000";
 const DEAD = 0;
 const ALIVE = 1;
 
-//TODO initUniverse
+// initUniverse
 
 const canvas = document.getElementById("game-of-life-canvas");
 canvas.height = (CELL_SIZE + 1) * height + 1;
@@ -29,15 +29,15 @@ const renderLoop = () => {
 };
 
 const drawGrid = () => {
-  //TODO drawGridBody
+  // drawGridBody
 };
 
 const drawCells = () => {
-  //TODO drawCellsBody
+  // drawCellsBody
 };
 
 const drawCellsOfType = (cells, condition, style) => {
-  //TODO drawCellsOfTypeBody
+  // drawCellsOfTypeBody
 };
 
 const getIndex = (row, column) => {
