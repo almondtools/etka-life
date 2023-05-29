@@ -35,6 +35,7 @@ fn App(cx: Scope) -> Element {
     });
 
     cx.render(rsx! {
+        style { include_str!("../src/style.css") }
         div { style: "{CONTAINER_STYLE}",
             PlayButton { is_playing: is_playing }
             Canvas { id: "game-of-life-canvas", universe: universe }
