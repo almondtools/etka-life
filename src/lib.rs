@@ -11,7 +11,7 @@ pub enum Cell {
 
 impl Cell {
     fn is_alive(&self) -> bool {
-        *self as u8 == 1
+        *self == Cell::Alive
     }
 }
 
@@ -50,14 +50,14 @@ impl Universe {
 impl Index<(u32, u32)> for Universe {
     type Output = Cell;
 
-    fn index(&self, index: (u32, u32)) -> &Cell {
+    fn index(&self, index: (u32, u32)) -> &Self::Output {
         let index = self.idx(index);
         &self.cells[index]
     }
 }
 
 impl IndexMut<(u32, u32)> for Universe {
-    fn index_mut(&mut self, index: (u32, u32)) -> &mut Cell {
+    fn index_mut(&mut self, index: (u32, u32)) -> &mut Self::Output {
         let index = self.idx(index);
         &mut self.cells[index]
     }
