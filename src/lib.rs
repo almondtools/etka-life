@@ -1,4 +1,4 @@
-use std::ops::{Index, IndexMut};
+use std::ops::Index;
 
 use wasm_bindgen::prelude::wasm_bindgen;
 
@@ -53,13 +53,6 @@ impl Index<(u32, u32)> for Universe {
     fn index(&self, index: (u32, u32)) -> &Self::Output {
         let index = self.idx(index);
         &self.cells[index]
-    }
-}
-
-impl IndexMut<(u32, u32)> for Universe {
-    fn index_mut(&mut self, index: (u32, u32)) -> &mut Self::Output {
-        let index = self.idx(index);
-        &mut self.cells[index]
     }
 }
 
