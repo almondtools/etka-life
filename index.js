@@ -1,12 +1,10 @@
 import { Universe } from "./pkg/etka_life";
-import { memory } from "./pkg/etka_life_bg.wasm";
 
 const CELL_SIZE = 5;
 const GRID_COLOR = "#CCCCCC";
 const DEAD_COLOR = "#FFFFFF";
 const ALIVE_COLOR = "#000000";
 
-const DEAD = 0;
 const ALIVE = 1;
 
 const universe = Universe.new();
@@ -49,24 +47,16 @@ const drawGrid = () => {
 };
 
 const drawCells = () => {
-  const cellsPtr = universe.cells();
-  const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
-
   ctx.beginPath();
 
-  drawCellsOfType(cells, ALIVE, ALIVE_COLOR);
-  drawCellsOfType(cells, DEAD, DEAD_COLOR);
-
-  ctx.stroke();
-};
-
-const drawCellsOfType = (cells, condition, style) => {
-  ctx.fillStyle = style;
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
-      const idx = getIndex(row, col);
-      if (cells[idx] !== condition) {
-        continue;
+      let cell = universe.cell_at(row, col);
+
+      if (cell === ALIVE) {
+        ctx.fillStyle = ALIVE_COLOR;
+      } else {
+        ctx.fillStyle = DEAD_COLOR;
       }
 
       ctx.fillRect(
@@ -77,10 +67,8 @@ const drawCellsOfType = (cells, condition, style) => {
       );
     }
   }
-};
 
-const getIndex = (row, column) => {
-  return row * width + column;
+  ctx.stroke();
 };
 
 const playPauseButton = document.getElementById("play-pause");

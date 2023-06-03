@@ -2,11 +2,11 @@ use std::ops::Index;
 
 use wasm_bindgen::prelude::wasm_bindgen;
 
-#[repr(u8)]
+#[wasm_bindgen]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Cell {
-    Dead = 0,
-    Alive = 1,
+    Dead,
+    Alive,
 }
 
 impl Cell {
@@ -88,8 +88,8 @@ impl Universe {
         self.height
     }
 
-    pub fn cells(&self) -> *const Cell {
-        self.cells.as_ptr()
+    pub fn cell_at(&self, row: u32, col: u32) -> Cell {
+        self[(row, col)]
     }
 
     pub fn tick(&mut self) {

@@ -2,11 +2,11 @@
 	"Cell": {
 		"prefix": "Cell",
 		"body": [
-			"#[repr(u8)]",
+			"#[wasm_bindgen]",
 			"#[derive(Clone, Copy, Debug, PartialEq, Eq)]",
 			"pub enum Cell {",
-			"    Dead = 0,",
-			"    Alive = 1,",
+			"    Dead,",
+			"    Alive,",
 			"}"
 		]
 	},
@@ -95,8 +95,8 @@
 			"        self.height",
 			"    }",
 			"",
-			"    pub fn cells(&self) -> *const Cell {",
-			"        self.cells.as_ptr()",
+			"    pub fn cell_at(&self, row: u32, col: u32) -> Cell {",
+			"        self[(row, col)]",
 			"    }",
 			"",
 			"    pub fn tick(&mut self) {",
@@ -184,26 +184,16 @@
 	"drawCellsBody": {
 		"prefix": "drawCellsBody",
 		"body": [
-			"const cellsPtr = universe.cells();",
-			"const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);",
-			"",
 			"ctx.beginPath();",
 			"",
-			"drawCellsOfType(cells, ALIVE, ALIVE_COLOR);",
-			"drawCellsOfType(cells, DEAD, DEAD_COLOR);",
-			"",
-			"ctx.stroke();"
-		]
-	},
-	"drawCellsOfTypeBody": {
-		"prefix": "drawCellsOfTypeBody",
-		"body": [
-			"ctx.fillStyle = style;",
 			"for (let row = 0; row < height; row++) {",
 			"  for (let col = 0; col < width; col++) {",
-			"    const idx = getIndex(row, col);",
-			"    if (cells[idx] !== condition) {",
-			"      continue;",
+			"    let cell = universe.cell_at(row, col);",
+			"",
+			"    if (cell === ALIVE) {",
+			"      ctx.fillStyle = ALIVE_COLOR;",
+			"    } else {",
+			"      ctx.fillStyle = DEAD_COLOR;",
 			"    }",
 			"",
 			"    ctx.fillRect(",
@@ -213,7 +203,9 @@
 			"      CELL_SIZE",
 			"    );",
 			"  }",
-			"}"
+			"}",
+			"",
+			"ctx.stroke();"
 		]
 	}
 }
