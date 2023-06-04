@@ -1,6 +1,6 @@
 use wasm_bindgen::JsCast;
 
-use crate::universe::{Cell, Universe};
+use crate::universe::Universe;
 
 pub const CELL_SIZE: u32 = 5;
 
