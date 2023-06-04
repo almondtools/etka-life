@@ -1,6 +1,6 @@
 use std::ops::Index;
 
-// #[repr(u8)]
+// #[wasm_bindgen]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Cell {
     Dead,
@@ -8,7 +8,7 @@ pub enum Cell {
 }
 
 impl Cell {
-    fn is_alive(&self) -> bool {
+    pub fn is_alive(&self) -> bool {
         *self == Cell::Alive
     }
 }
@@ -86,9 +86,9 @@ impl Universe {
         self.height
     }
 
-    // pub fn cells(&self) -> *const Cell {
-    //     self.cells.as_ptr()
-    // }
+    pub fn cell_at(&self, row: u32, col: u32) -> Cell {
+        self[(row, col)]
+    }
 
     pub fn tick(&mut self) {
         use Cell::*;

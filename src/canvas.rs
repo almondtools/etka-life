@@ -1,6 +1,6 @@
 use wasm_bindgen::JsCast;
 
-use crate::universe::{Cell, Universe};
+use crate::universe::Universe;
 
 pub const CELL_SIZE: u32 = 5;
 
@@ -42,18 +42,12 @@ impl<'a> CanvasController<'a> {
     fn draw_cells(&self) {
         self.context.begin_path();
 
-        self.draw_cells_with_style(|cell| cell == Cell::Alive, ALIVE_COLOR);
-        self.draw_cells_with_style(|cell| cell == Cell::Dead, DEAD_COLOR);
-
-        self.context.stroke();
-    }
-
-    fn draw_cells_with_style(&self, condition: impl Fn(Cell) -> bool, style: &str) {
-        self.context.set_fill_style(&style.into());
         for row in 0..self.universe.height() {
             for col in 0..self.universe.width() {
-                if !condition(self.universe[(row, col)]) {
-                    continue;
+                if self.universe.cell_at(row, col).is_alive() {
+                    self.context.set_fill_style(&ALIVE_COLOR.into());
+                } else {
+                    self.context.set_fill_style(&DEAD_COLOR.into());
                 }
 
                 self.context.fill_rect(
@@ -64,6 +58,8 @@ impl<'a> CanvasController<'a> {
                 );
             }
         }
+
+        self.context.stroke();
     }
 
     fn draw_grid(&self) {
