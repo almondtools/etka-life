@@ -1,12 +1,10 @@
 import { Universe } from "./pkg/etka_life";
-import { memory } from "./pkg/etka_life_bg.wasm";
 
 const CELL_SIZE = 5;
 const GRID_COLOR = "#CCCCCC";
 const DEAD_COLOR = "#FFFFFF";
 const ALIVE_COLOR = "#000000";
 
-const DEAD = 0;
 const ALIVE = 1;
 
 // initUniverse
@@ -34,14 +32,6 @@ const drawGrid = () => {
 
 const drawCells = () => {
   // drawCellsBody
-};
-
-const drawCellsOfType = (cells, condition, style) => {
-  // drawCellsOfTypeBody
-};
-
-const getIndex = (row, column) => {
-  return row * width + column;
 };
 
 const playPauseButton = document.getElementById("play-pause");

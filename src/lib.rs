@@ -1,4 +1,4 @@
-use std::ops::{Index, IndexMut};
+use std::ops::Index;
 
 use wasm_bindgen::prelude::wasm_bindgen;
 
@@ -11,7 +11,5 @@ use wasm_bindgen::prelude::wasm_bindgen;
 // implUniverse
 
 // impl Index
-
-// impl IndexMut
 
 // implUniverseApi
